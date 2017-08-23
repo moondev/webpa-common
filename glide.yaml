@@ -12,6 +12,8 @@ import:
   - jwt
 - package: github.com/go-kit/kit
   version: "0.5.0"
+- package: github.com/VividCortex/gohistogram
+  version: "v1.0.0"
 - package: github.com/billhathaway/consistentHash
   version: addea16d2229dba874111898b45be7f4a78af631
 - package: github.com/gorilla/mux
