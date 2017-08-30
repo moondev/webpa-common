@@ -2,11 +2,12 @@ package service
 
 import (
 	"errors"
+	"testing"
+
 	"github.com/strava/go.serversets"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestNewRegistrar(t *testing.T) {
@@ -42,7 +43,7 @@ func TestNewRegistrar(t *testing.T) {
 
 		assert.Equal(o.baseDirectory(), serversets.BaseDirectory)
 		assert.Equal(o.memberPrefix(), serversets.MemberPrefix)
-		assert.Equal(o.timeout(), registrar.ZKTimeout)
+		assert.Equal(o.connectTimeout(), registrar.ZKTimeout)
 	}
 }
 

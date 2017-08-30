@@ -47,7 +47,7 @@ func NewRegistrar(o *Options) Registrar {
 		o.servers(),
 	)
 
-	serverSet.ZKTimeout = o.timeout()
+	serverSet.ZKTimeout = o.connectTimeout()
 	return (*registrar)(serverSet)
 }
 

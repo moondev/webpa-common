@@ -2,6 +2,9 @@ package service
 
 import (
 	"github.com/Comcast/webpa-common/logging"
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/sd"
+	"github.com/go-kit/kit/sd/zk"
 	"github.com/spf13/viper"
 )
 
@@ -40,4 +43,44 @@ func Initialize(logger logging.Logger, pingFunc func() error, v *viper.Viper) (o
 	r = NewRegistrar(o)
 	re, err = RegisterAll(r, o)
 	return
+}
+
+func NewGokitRegistrars(o *Options, logger log.Logger) ([]sd.Registrar, error) {
+	registrations := o.registrations()
+	if len(registrations) == 0 {
+		return nil, nil
+	}
+
+	// TODO: Just log to stdout for now until we fully migrate to go-kit
+	client, err := zk.NewClient(
+		o.servers(),
+		logger,
+		zk.ConnectTimeout(o.connectTimeout()),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	registrars := make([]sd.Registrar, 0, len(registrations))
+	for _, registration := range registrations {
+		r := zk.NewRegistrar(
+			client,
+			zk.Service{
+				Path: o.baseDirectory(),
+				Name: o.serviceName(),
+				Data: []byte(registration),
+			},
+			logger,
+		)
+
+		r.Register()
+		registrars = append(registrars, r)
+	}
+
+	return registrars, nil
+}
+
+func NewGokitInstancers(o *Options, logger log.Logger) ([]sd.Instancer, error) {
+	return nil, nil
 }

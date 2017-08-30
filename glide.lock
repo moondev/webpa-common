@@ -1,5 +1,5 @@
-hash: 46a0583cbf48f58b394f3779a0aab1d0d52e54026635cb40161fbe65b8e4d4c6
-updated: 2017-08-22T18:19:33.201446389-07:00
+hash: 6c0728e7d7c981eea1bb39644bd0d48ff0e5560397087774fc554d1a732a1087
+updated: 2017-08-28T13:01:42.442029691-07:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 7be45195c3af1b54a609812f90c05a7e492e2491
@@ -50,9 +50,15 @@ imports:
 - name: github.com/go-kit/kit
   version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
   subpackages:
-  - metrics
-  - metrics/generic
-  - metrics/internal/lv
+  - endpoint
+  - log
+  - sd
+  - sd/internal/instance
+  - sd/zk
+- name: github.com/go-logfmt/logfmt
+  version: 390ab7935ee28ec6b286364bba9b4dd6410cb3d5
+- name: github.com/go-stack/stack
+  version: 817915b46b97fd7bb80e8ab6b69f01a53ac3eebf
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
@@ -85,6 +91,8 @@ imports:
   version: 307ae868f90f4ee1b73ebe4596e0394237dacce8
 - name: github.com/justinas/alice
   version: 052b8b6c18edb9db317af86806d8e00ebaa94160
+- name: github.com/kr/logfmt
+  version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/magiconair/properties
   version: b3b15ef068fd0b17ddf408a23669f20811d194d2
 - name: github.com/mitchellh/mapstructure

@@ -1,22 +1,24 @@
 package service
 
 import (
-	"github.com/Comcast/webpa-common/logging"
-	"github.com/strava/go.serversets"
 	"strings"
 	"time"
+
+	"github.com/Comcast/webpa-common/logging"
+	"github.com/strava/go.serversets"
 )
 
 const (
-	DefaultScheme        = "http"
-	DefaultHost          = "localhost"
-	DefaultServer        = "localhost:2181"
-	DefaultTimeout       = 5 * time.Second
-	DefaultBaseDirectory = "/webpa"
-	DefaultMemberPrefix  = "webpa_"
-	DefaultEnvironment   = serversets.Local
-	DefaultServiceName   = "test"
-	DefaultVnodeCount    = 211
+	DefaultScheme         = "http"
+	DefaultHost           = "localhost"
+	DefaultServer         = "localhost:2181"
+	DefaultConnectTimeout = 10 * time.Second
+	DefaultSessionTimeout = 10 * time.Minute
+	DefaultBaseDirectory  = "/webpa"
+	DefaultMemberPrefix   = "webpa_"
+	DefaultEnvironment    = serversets.Local
+	DefaultServiceName    = "test"
+	DefaultVnodeCount     = 211
 )
 
 // Options represents the set of configurable attributes for service discovery and registration
@@ -33,8 +35,11 @@ type Options struct {
 	// and they will be merged together when connecting to Zookeeper.
 	Servers []string `json:"servers,omitempty"`
 
-	// Timeout is the Zookeeper connection timeout.
-	Timeout time.Duration `json:"timeout"`
+	// ConnectTimeout is the Zookeeper connection timeout.
+	ConnectTimeout time.Duration `json:"connectTimeout"`
+
+	// SessionTimeout is the Zookeeper session timeout.
+	SessionTimeout time.Duration `json:"sessionTimeout"`
 
 	// BaseDirectory is the base path for all znodes created via this Options.
 	BaseDirectory string `json:"baseDirectory,omitempty"`
@@ -92,12 +97,20 @@ func (o *Options) servers() []string {
 	return servers
 }
 
-func (o *Options) timeout() time.Duration {
-	if o != nil && o.Timeout > 0 {
-		return time.Duration(o.Timeout)
+func (o *Options) connectTimeout() time.Duration {
+	if o != nil && o.ConnectTimeout > 0 {
+		return time.Duration(o.ConnectTimeout)
 	}
 
-	return DefaultTimeout
+	return DefaultConnectTimeout
+}
+
+func (o *Options) sessionTimeout() time.Duration {
+	if o != nil && o.SessionTimeout > 0 {
+		return time.Duration(o.SessionTimeout)
+	}
+
+	return DefaultSessionTimeout
 }
 
 func (o *Options) baseDirectory() string {
