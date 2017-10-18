@@ -11,7 +11,7 @@ import (
 
 // Type is the type of key, which determines the JWT algorithms
 // that can use the key.
-type Type uint32
+type Type int
 
 const (
 	HMAC Type = iota

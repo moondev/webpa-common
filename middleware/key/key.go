@@ -64,12 +64,7 @@ func (k *key) Expires() time.Time {
 }
 
 // NewVerifyKey returns a key useful for verifying signatures
-func NewVerifyKey(kid, alg string, data []byte, expires time.Time) (Interface, error) {
-	keyType, err := TypeFromAlg(alg)
-	if err != nil {
-		return nil, err
-	}
-
+func NewVerifyKey(keyType Type, kid string, data []byte, expires time.Time) (Interface, error) {
 	parsedKey, err := keyType.ParseVerifyKey(data)
 	if err != nil {
 		return nil, err
@@ -86,12 +81,7 @@ func NewVerifyKey(kid, alg string, data []byte, expires time.Time) (Interface, e
 }
 
 // NewSignKey returns a key useful for signing
-func NewSignKey(kid, alg string, data []byte, expires time.Time) (Interface, error) {
-	keyType, err := TypeFromAlg(alg)
-	if err != nil {
-		return nil, err
-	}
-
+func NewSignKey(keyType Type, kid string, data []byte, expires time.Time) (Interface, error) {
 	parsedKey, err := keyType.ParseSignKey(data)
 	if err != nil {
 		return nil, err
@@ -133,4 +123,15 @@ func RefreshKey(original Interface, data []byte, expires time.Time) (Interface, 
 		sign:      original.Sign(),
 		expires:   expires,
 	}, nil
+}
+
+// Expired tests if the given key is considered to be expired
+// at the given time.
+func Expired(k Interface, now time.Time) bool {
+	expires := k.Expires()
+	if expires.IsZero() {
+		return false
+	}
+
+	return expires.After(now)
 }

@@ -3,32 +3,23 @@ package keyhttp
 import (
 	"context"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 
+	"github.com/Comcast/webpa-common/middleware/key"
 	gokithttp "github.com/go-kit/kit/transport/http"
 	"github.com/jtacoma/uritemplates"
 )
 
-const DefaultKIDParameterName = "kid"
+const KIDParameterName = "kid"
 
-// SimpleEncodeKeyRequest does nothing to the request except apply custom headers.  This
-// encoder function is appropriate when the full URL of the key can be configured ahead of time.
-func SimpleEncodeKeyRequest(custom http.Header) gokithttp.EncodeRequestFunc {
-	return func(_ context.Context, request *http.Request, _ interface{}) error {
-		for name, values := range custom {
-			for _, value := range values {
-				request.Header.Add(name, value)
-			}
-		}
-
-		return nil
-	}
-}
-
-// TemplateEncodeKeyRequest discards the URL of an HTTP request in favor of a URI template expansion using
+// EncodeTemplateKeyRequest discards the URL of an HTTP request in favor of a URI template expansion using
 // the kid (key identifier).
-func TemplateEncodeKeyRequest(rawTemplate, parameter string, custom http.Header) gokithttp.EncodeRequestFunc {
+//
+// This encoder is only necessary if the URL can vary for each key.  For situations where the same URL
+// can be used all the time, no encoder is necessary.
+func EncodeTemplateKeyRequest(rawTemplate string) gokithttp.EncodeRequestFunc {
 	if len(rawTemplate) == 0 {
 		panic(errors.New("missing raw URI template"))
 	}
@@ -38,12 +29,9 @@ func TemplateEncodeKeyRequest(rawTemplate, parameter string, custom http.Header)
 		panic(err)
 	}
 
-	if len(parameter) == 0 {
-		parameter = DefaultKIDParameterName
-	}
-
-	return func(_ context.Context, request *http.Request, kid interface{}) error {
-		expanded, err := template.Expand(map[string]interface{}{parameter: kid})
+	return func(_ context.Context, request *http.Request, v interface{}) error {
+		resolverRequest := v.(*key.ResolverRequest)
+		expanded, err := template.Expand(map[string]interface{}{KIDParameterName: resolverRequest.KID})
 		if err != nil {
 			return err
 		}
@@ -53,17 +41,22 @@ func TemplateEncodeKeyRequest(rawTemplate, parameter string, custom http.Header)
 			return nil
 		}
 
-		for name, values := range custom {
-			for _, value := range values {
-				request.Header.Add(name, value)
-			}
-		}
-
 		return nil
 	}
 }
 
-// DecodeKeyResponse is the go-kit transport/http.DecodeResponseFunc that turns a PEM-encoded response
+// DecodeVerifyKeyResponse is the go-kit transport/http.DecodeResponseFunc that turns a PEM-encoded response
 // into the appropriate key.
-func DecodeKeyResponse(_ context.Context, response *http.Response) (interface{}, error) {
+func DecodeVerifyKeyResponse(ctx context.Context, response *http.Response) (interface{}, error) {
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	rr := key.GetResolverRequest(ctx)
+	if rr == nil {
+		return nil, errors.New("No ResolverRequest in context")
+	}
+
+	return nil, nil
 }
