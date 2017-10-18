@@ -48,7 +48,7 @@ func EncodeTemplateKeyRequest(rawTemplate string) gokithttp.EncodeRequestFunc {
 // DecodeVerifyKeyResponse is the go-kit transport/http.DecodeResponseFunc that turns a PEM-encoded response
 // into the appropriate key.
 func DecodeVerifyKeyResponse(ctx context.Context, response *http.Response) (interface{}, error) {
-	data, err := ioutil.ReadAll(response.Body)
+	_, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
