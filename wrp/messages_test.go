@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -60,32 +59,12 @@ func testMessageSetIncludeSpans(t *testing.T) {
 }
 
 func testMessageRoutable(t *testing.T, original Message) {
-	var (
-		assert  = assert.New(t)
-		require = require.New(t)
-	)
+	assert := assert.New(t)
 
 	assert.Equal(original.Type, original.MessageType())
 	assert.Equal(original.Destination, original.To())
 	assert.Equal(original.Source, original.From())
 	assert.Equal(original.TransactionUUID, original.TransactionKey())
-	assert.Equal(
-		original.Type.SupportsTransaction() && len(original.TransactionUUID) > 0,
-		original.IsTransactionPart(),
-	)
-
-	routable := original.Response("testMessageRoutable", 1234)
-	require.NotNil(routable)
-	response, ok := routable.(*Message)
-	require.NotNil(response)
-	require.True(ok)
-
-	assert.Equal(original.Type, response.Type)
-	assert.Equal(original.Source, response.Destination)
-	assert.Equal("testMessageRoutable", response.Source)
-	require.NotNil(response.RequestDeliveryResponse)
-	assert.Equal(int64(1234), *response.RequestDeliveryResponse)
-	assert.Nil(response.Payload)
 }
 
 func testMessageEncode(t *testing.T, f Format, original Message) {
@@ -246,32 +225,12 @@ func testSimpleRequestResponseSetIncludeSpans(t *testing.T) {
 }
 
 func testSimpleRequestResponseRoutable(t *testing.T, original SimpleRequestResponse) {
-	var (
-		assert  = assert.New(t)
-		require = require.New(t)
-	)
+	assert := assert.New(t)
 
 	assert.Equal(original.Type, original.MessageType())
 	assert.Equal(original.Destination, original.To())
 	assert.Equal(original.Source, original.From())
 	assert.Equal(original.TransactionUUID, original.TransactionKey())
-	assert.Equal(
-		len(original.TransactionUUID) > 0,
-		original.IsTransactionPart(),
-	)
-
-	routable := original.Response("testSimpleRequestResponseRoutable", 34734)
-	require.NotNil(routable)
-	response, ok := routable.(*SimpleRequestResponse)
-	require.NotNil(response)
-	require.True(ok)
-
-	assert.Equal(original.Type, response.Type)
-	assert.Equal(original.Source, response.Destination)
-	assert.Equal("testSimpleRequestResponseRoutable", response.Source)
-	require.NotNil(response.RequestDeliveryResponse)
-	assert.Equal(int64(34734), *response.RequestDeliveryResponse)
-	assert.Nil(response.Payload)
 }
 
 func testSimpleRequestResponseEncode(t *testing.T, f Format, original SimpleRequestResponse) {
@@ -344,27 +303,12 @@ func TestSimpleRequestResponse(t *testing.T) {
 }
 
 func testSimpleEventRoutable(t *testing.T, original SimpleEvent) {
-	var (
-		assert  = assert.New(t)
-		require = require.New(t)
-	)
+	assert := assert.New(t)
 
 	assert.Equal(original.Type, original.MessageType())
 	assert.Equal(original.Destination, original.To())
 	assert.Equal(original.Source, original.From())
 	assert.Empty(original.TransactionKey())
-	assert.False(original.IsTransactionPart())
-
-	routable := original.Response("testSimpleEventRoutable", 82)
-	require.NotNil(routable)
-	response, ok := routable.(*SimpleEvent)
-	require.NotNil(response)
-	require.True(ok)
-
-	assert.Equal(original.Type, response.Type)
-	assert.Equal(original.Source, response.Destination)
-	assert.Equal("testSimpleEventRoutable", response.Source)
-	assert.Nil(response.Payload)
 }
 
 func testSimpleEventEncode(t *testing.T, f Format, original SimpleEvent) {
@@ -463,31 +407,12 @@ func testCRUDSetIncludeSpans(t *testing.T) {
 }
 
 func testCRUDRoutable(t *testing.T, original CRUD) {
-	var (
-		assert  = assert.New(t)
-		require = require.New(t)
-	)
+	assert := assert.New(t)
 
 	assert.Equal(original.Type, original.MessageType())
 	assert.Equal(original.Destination, original.To())
 	assert.Equal(original.Source, original.From())
 	assert.Equal(original.TransactionUUID, original.TransactionKey())
-	assert.Equal(
-		len(original.TransactionUUID) > 0,
-		original.IsTransactionPart(),
-	)
-
-	routable := original.Response("testCRUDRoutable", 369)
-	require.NotNil(routable)
-	response, ok := routable.(*CRUD)
-	require.NotNil(response)
-	require.True(ok)
-
-	assert.Equal(original.Type, response.Type)
-	assert.Equal(original.Source, response.Destination)
-	assert.Equal("testCRUDRoutable", response.Source)
-	require.NotNil(response.RequestDeliveryResponse)
-	assert.Equal(int64(369), *response.RequestDeliveryResponse)
 }
 
 func testCRUDEncode(t *testing.T, f Format, original CRUD) {

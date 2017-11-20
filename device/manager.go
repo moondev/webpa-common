@@ -266,7 +266,7 @@ func (m *manager) readPump(d *device, c Connection, closeOnce *sync.Once) {
 		event.SetMessageReceived(d, message, wrp.Msgpack, rawFrame)
 
 		// update any waiting transaction
-		if message.IsTransactionPart() {
+		if transactionKey := message.TransactionUUID; len(transactionKey) > 0 && message.Type.SupportsTransaction() {
 			err := d.transactions.Complete(
 				message.TransactionKey(),
 				&Response{

@@ -35,7 +35,7 @@ type Request struct {
 // wheither this request represents part of a transaction.
 func (r *Request) Transactional() (string, bool) {
 	if routable, ok := r.Message.(wrp.Routable); ok {
-		return routable.TransactionKey(), routable.IsTransactionPart()
+		return routable.TransactionKey(), routable.MessageType().SupportsTransaction()
 	}
 
 	return "", false

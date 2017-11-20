@@ -26,28 +26,12 @@ type Routable interface {
 	// in WRP messages defined in this package.
 	From() string
 
-	// IsTransactionPart tests if this message represents part of a transaction.  For this to be true,
-	// both (1) the msg_type field must be of a type that participates in transactions and (2) a transaction_uuid
-	// must exist in the message (see TransactionKey).
-	//
-	// If this method returns true, TransactionKey will always return a non-empty string.
-	IsTransactionPart() bool
-
 	// TransactionKey corresponds to the transaction_uuid field.  If present, this field is used
 	// to match up responses from devices.
 	//
 	// Not all Routables support transactions, e.g. SimpleEvent.  For those Routable messages that do
 	// not possess a transaction_uuid field, this method returns an empty string.
 	TransactionKey() string
-
-	// Response produces a new Routable instance which is a response to this one.  The new Routable's
-	// destination (From) is set to the original source (To), with the supplied newSource used as the response's source.
-	// The requestDeliveryResponse parameter indicates the success or failure of this response.  The underlying
-	// type of the returned Routable will be the same as this type, i.e. if this instance is a Message,
-	// the returned Routable will also be a Message.
-	//
-	// If applicable, the response's payload is set to nil.  All other fields are copied as is into the response.
-	Response(newSource string, requestDeliveryResponse int64) Routable
 }
 
 // Message is the union of all WRP fields, made optional (except for Type).  This type is
@@ -93,22 +77,8 @@ func (msg *Message) From() string {
 	return msg.Source
 }
 
-func (msg *Message) IsTransactionPart() bool {
-	return msg.Type.SupportsTransaction() && len(msg.TransactionUUID) > 0
-}
-
 func (msg *Message) TransactionKey() string {
 	return msg.TransactionUUID
-}
-
-func (msg *Message) Response(newSource string, requestDeliveryResponse int64) Routable {
-	response := *msg
-	response.Destination = msg.Source
-	response.Source = newSource
-	response.RequestDeliveryResponse = &requestDeliveryResponse
-	response.Payload = nil
-
-	return &response
 }
 
 // SetStatus simplifies setting the optional Status field, which is a pointer type tagged with omitempty.
@@ -204,22 +174,8 @@ func (msg *SimpleRequestResponse) From() string {
 	return msg.Source
 }
 
-func (msg *SimpleRequestResponse) IsTransactionPart() bool {
-	return len(msg.TransactionUUID) > 0
-}
-
 func (msg *SimpleRequestResponse) TransactionKey() string {
 	return msg.TransactionUUID
-}
-
-func (msg *SimpleRequestResponse) Response(newSource string, requestDeliveryResponse int64) Routable {
-	response := *msg
-	response.Destination = msg.Source
-	response.Source = newSource
-	response.RequestDeliveryResponse = &requestDeliveryResponse
-	response.Payload = nil
-
-	return &response
 }
 
 // SimpleEvent represents a WRP message of type SimpleEventMessageType.
@@ -258,22 +214,8 @@ func (msg *SimpleEvent) From() string {
 	return msg.Source
 }
 
-// IsTransactionPart for SimpleEvent types always returns false
-func (msg *SimpleEvent) IsTransactionPart() bool {
-	return false
-}
-
 func (msg *SimpleEvent) TransactionKey() string {
 	return ""
-}
-
-func (msg *SimpleEvent) Response(newSource string, requestDeliveryResponse int64) Routable {
-	response := *msg
-	response.Destination = msg.Source
-	response.Source = newSource
-	response.Payload = nil
-
-	return &response
 }
 
 // CRUD represents a WRP message of one of the CRUD message types.  This type does not implement BeforeEncode,
@@ -326,21 +268,8 @@ func (msg *CRUD) From() string {
 	return msg.Source
 }
 
-func (msg *CRUD) IsTransactionPart() bool {
-	return len(msg.TransactionUUID) > 0
-}
-
 func (msg *CRUD) TransactionKey() string {
 	return msg.TransactionUUID
-}
-
-func (msg *CRUD) Response(newSource string, requestDeliveryResponse int64) Routable {
-	response := *msg
-	response.Destination = msg.Source
-	response.Source = newSource
-	response.RequestDeliveryResponse = &requestDeliveryResponse
-
-	return &response
 }
 
 // ServiceRegistration represents a WRP message of type ServiceRegistrationMessageType.

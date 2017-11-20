@@ -15,13 +15,6 @@ import (
 	gokithttp "github.com/go-kit/kit/transport/http"
 )
 
-// Entity is the fanout entity produced by the decoders in this package
-type Entity struct {
-	Format   wrp.Format
-	Contents []byte
-	Message  wrp.Message
-}
-
 // DecodeRequest is a go-kit DecodeRequestFunc that produces an Entity from the given HTTP request.
 // The Content-Type header is used to determine the format, and if not specified wrp.Msgpack is used.
 func DecodeRequest(ctx context.Context, original *http.Request) (interface{}, error) {
@@ -41,13 +34,7 @@ func DecodeRequest(ctx context.Context, original *http.Request) (interface{}, er
 		}
 	}
 
-	entity := &Entity{
-		Format:   format,
-		Contents: contents,
-	}
-
-	err = wrp.NewDecoderBytes(contents, format).Decode(&entity.Message)
-	return entity, err
+	return wrp.DecodeEntityBytes(format, contents)
 }
 
 // DecodeRequestHeaders is a go-kit DecodeRequestFunc that uses the HTTP headers as fields of a WRP message.
