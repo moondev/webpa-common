@@ -308,8 +308,54 @@ type StatHandler struct {
 	Variable string
 }
 
+type StatHandler2 struct {
+	Logger   log.Logger
+	Registry Registry
+	Variable string
+}
+
 func (sh *StatHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	sh.Logger.Log(level.Key(), level.DebugValue(), "handler", "StatHandler", logging.MessageKey(), "ServeHTTP")
+	vars := mux.Vars(request)
+	if len(vars) == 0 {
+		sh.Logger.Log(level.Key(), level.ErrorValue(), logging.MessageKey(), "no path variables present for request")
+		response.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	name, ok := vars[sh.Variable]
+	if !ok {
+		sh.Logger.Log(level.Key(), level.ErrorValue(), logging.MessageKey(), "missing path variable", "variable", sh.Variable)
+		response.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	id, err := ParseID(name)
+	if err != nil {
+		sh.Logger.Log(level.Key(), level.ErrorValue(), logging.MessageKey(), "unable to parse identifier", "deviceName", name, logging.ErrorKey(), err)
+		response.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	d, ok := sh.Registry.Get(id)
+	if !ok {
+		response.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	data, err := d.MarshalJSON()
+	if err != nil {
+		sh.Logger.Log(level.Key(), level.ErrorValue(), logging.MessageKey(), "unable to marshal device as JSON", "deviceName", name, logging.ErrorKey(), err)
+		response.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	response.Header().Set("Content-Type", "application/json")
+	response.Write(data)
+}
+
+func (sh *StatHandler2) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+	sh.Logger.Log(level.Key(), level.DebugValue(), "handler", "StatHandler2", logging.MessageKey(), "ServeHTTP")
 	vars := mux.Vars(request)
 	if len(vars) == 0 {
 		sh.Logger.Log(level.Key(), level.ErrorValue(), logging.MessageKey(), "no path variables present for request")
